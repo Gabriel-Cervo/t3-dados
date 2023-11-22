@@ -1,0 +1,8 @@
+name: preProcEnv
+channels:
+  - defaults
+dependencies:
+  - pandas
+  - numpy
+  - python=3.7
+prefix: /Users/joaogabrieldouradocervo/anaconda3/envs/preProcEnv
