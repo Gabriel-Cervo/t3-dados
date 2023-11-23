@@ -19,6 +19,7 @@ O projeto possui um pré-processamento que deve ser executado antes de realizar 
 ``python pre_processamento.py``
 
 4. Após isso, será gerado um arquivo '.csv' no seguinte formato:
+
 ```"CID", "RO", "AC", "AM", "RR", "PA", "AP", "TO", "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", "SC", "RS", "MS", "MT", "GO", "DF", "TOTAL"```
 
 Onde CID significa a doença e as colunas de cada estado é o número de mortes dessa doença em determinado estado. O total também é exibido na última coluna.
