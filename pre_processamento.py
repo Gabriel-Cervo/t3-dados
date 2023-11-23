@@ -50,34 +50,35 @@ def separateDataByCid():
     })
 
 def correctStateInItem(item):
-    print(item)
-    print("::::::")
     mutedItem = item.split(";")
     correctedItem = [mutedItem[0]]
 
-    for index, row in enumerate(mutedItem[1:27]):
-        if row is not "-":
-            correctedItem.append(statesByIndex[index + 1])
+    correctedItem.append({ "ESTADOS": {}, "TOTAL": int(mutedItem[28])  })
 
-    correctedItem.append(mutedItem[28])
+    for index, row in enumerate(mutedItem[1:28]):
+        correctedRow = row
+   
+        if row is "-":
+            correctedRow = 0 
+
+        correctedItem[1]["ESTADOS"][statesByIndex[index + 1]] = int(correctedRow)
+
     return correctedItem 
 
-def organizeByIndividualState(cids):
-    total = 0
-
-    cidWithAttr = {
-        cids[0][0]: {}
+def organizeEachIndividualState(data):
+    dict = {
+        data[0][0]: { "ESTADOS": data[0][1]["ESTADOS"], "TOTAL": data[0][1]["TOTAL"] }
     }
+    
+    for _, cid in enumerate(data[1:]):
+        for key, item in cid[1].items():
+            if key == "ESTADOS":
+                for stateKey, value in item.items():
+                    dict[data[0][0]]["ESTADOS"][stateKey] += int(value)
+            else:
+                dict[data[0][0]]["TOTAL"] += int(item)
 
-    for cid in cids:
-        for key, state in statesByIndex.items():
-            cidWithAttr[cid[0]][state] = 0
-
-        for attr in cid[1:-1]:
-            cidWithAttr[cid[0]][attr] = int(cidWithAttr[cid[0]][attr]) + int(cid[-1])
-
-    cidWithAttr[cid[0]]["TOTAL"] = 0
-    return cidWithAttr
+    return dict
 
 def organizeDataByState():
     dataWithState = []
@@ -88,20 +89,24 @@ def organizeDataByState():
 
             for index, row in enumerate(cid):
                 mutableCid[index] = correctStateInItem(row)    
-            
-            dataWithState.append(organizeByIndividualState(mutableCid))
+
+            dataWithState.append(organizeEachIndividualState(mutableCid))
 
     return dataWithState
 
 def exportProcessedCSV(data):
     fields = ["CID","RO","AC","AM","RR","PA","AP","TO","MA","PI","CE","RN","PB","PE","AL","SE","BA","MG","ES","RJ","SP","PR","SC","RS","MS", "MT", "GO", "DF", "TOTAL" ]
-
-    with open("test_output.csv", "w") as output:
+    
+    with open("dados_tratados.csv", "w") as output:
         w = csv.DictWriter(output, fields)
         for item in data:
             for key, val in sorted(item.items()):
                 row = {'CID': key }
-                row.update(val)
+
+                for keyState, state in val["ESTADOS"].items():
+                    row.update({ keyState: state })
+
+                row.update({ "TOTAL": val["TOTAL"]  })
                 w.writerow(row)
 
 if __name__ == '__main__':
