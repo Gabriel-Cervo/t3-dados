@@ -58,7 +58,7 @@ def correctStateInItem(item):
     for index, row in enumerate(mutedItem[1:28]):
         correctedRow = row
    
-        if row is "-":
+        if row == "-":
             correctedRow = 0 
 
         correctedItem[1]["ESTADOS"][statesByIndex[index + 1]] = int(correctedRow)
@@ -97,7 +97,7 @@ def organizeDataByState():
 def exportProcessedCSV(data):
     fields = ["CID","RO","AC","AM","RR","PA","AP","TO","MA","PI","CE","RN","PB","PE","AL","SE","BA","MG","ES","RJ","SP","PR","SC","RS","MS", "MT", "GO", "DF", "TOTAL" ]
     
-    with open("dados_tratados.csv", "w") as output:
+    with open("dados_tratados.csv", "w", newline='') as output:
         w = csv.DictWriter(output, fields)
         for item in data:
             for key, val in sorted(item.items()):
@@ -121,3 +121,8 @@ if __name__ == '__main__':
 
     stateDict = organizeDataByState()
     exportProcessedCSV(stateDict)
+
+    print("------------------------------------------")
+    print("---- Processamento finalizado com sucesso! -------")
+    print("----------- Para ver os dados, acesse o arquivo 'dados_tratados.csv' -----------")
+    print("------------------------------------------")
