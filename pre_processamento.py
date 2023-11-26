@@ -1,17 +1,17 @@
 import pandas as pd
 import glob
 import csv
-import itertools
-import sys
-
-cancerCidsNumber = (00, 97)
 
 def read_csv(args):
     return pd.read_csv(args, encoding='latin1', on_bad_lines='skip')
 
-path = glob.glob("./dados_brutos/*.csv")
-df = pd.concat(map(read_csv, path))
+infantilPath = glob.glob("./dados_brutos/infantil/*.csv")
+df = pd.concat(map(read_csv, infantilPath))
 df = df.reset_index()  
+
+adultoPath = glob.glob("./dados_brutos/geral/*.csv")
+adultoDf = pd.concat(map(read_csv, adultoPath))
+adultoDf = adultoDf.reset_index()
 
 dfByCid = pd.DataFrame({})
 
@@ -25,7 +25,7 @@ def breakItem(row):
 def getCid(item):
     return item[0].split(" ")[0]
 
-def removeUnnecessaryCids():
+def removeUnnecessaryCids(df):
     for index, row in df.iterrows():
          breakedItem = breakItem(row)
          cid = getCid(breakedItem)
@@ -33,7 +33,7 @@ def removeUnnecessaryCids():
          if "C" not in cid and "D46" not in cid:
              df.drop(index, inplace=True)
 
-def separateDataByCid():
+def separateDataByCid(df):
     dataByCids = {}
 
     for _, row in df.iterrows():
@@ -80,10 +80,10 @@ def organizeEachIndividualState(data):
 
     return dict
 
-def organizeDataByState():
+def organizeDataByState(df):
     dataWithState = []
 
-    for _, row in dfByCid.iterrows():
+    for _, row in df.iterrows():
         for cid in row:
             mutableCid = cid
 
@@ -94,10 +94,10 @@ def organizeDataByState():
 
     return dataWithState
 
-def exportProcessedCSV(data):
+def exportProcessedCSV(data, outputName):
     fields = ["CID","RO","AC","AM","RR","PA","AP","TO","MA","PI","CE","RN","PB","PE","AL","SE","BA","MG","ES","RJ","SP","PR","SC","RS","MS", "MT", "GO", "DF", "TOTAL" ]
     
-    with open("dados_tratados.csv", "w", newline='') as output:
+    with open(outputName, "w", newline='') as output:
         header = ",".join(fields) + "\n"
         output.write(header)
         w = csv.DictWriter(output, fields)
@@ -111,20 +111,32 @@ def exportProcessedCSV(data):
                 row.update({ "TOTAL": val["TOTAL"]  })
                 w.writerow(row)
 
+def processDataAndExport(df, exportFileName):
+    removeUnnecessaryCids(df)
+    dfByCid = separateDataByCid(df)
+    stateDict = organizeDataByState(dfByCid)
+    exportProcessedCSV(stateDict, exportFileName)
+
+
 if __name__ == '__main__':
     print("------------------------------------------")
     print("---- Realizando o pré-processamento dos dados brutos -------")
     print("----------- Aguarde um momento -----------")
     print("------------------------------------------")
+    
+    print("")
+    print("Processando os dados infantis...")
+    print("")
 
-    removeUnnecessaryCids()
+    processDataAndExport(df, "dados_infantis.csv")
 
-    dfByCid = separateDataByCid()
+    print("")
+    print("Processando os dados de adultos...")
+    print("")
 
-    stateDict = organizeDataByState()
-    exportProcessedCSV(stateDict)
+    processDataAndExport(adultoDf, "dados_adultos.csv")
 
     print("------------------------------------------")
     print("---- Processamento finalizado com sucesso! -------")
-    print("----------- Para ver os dados, acesse o arquivo 'dados_tratados.csv' -----------")
+    print("----------- Para ver os dados, acesse os arquivos: 'dados_infantis.csv' e; 'dados_adultos.csv' -----------")
     print("------------------------------------------")
