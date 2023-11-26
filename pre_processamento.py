@@ -98,6 +98,8 @@ def exportProcessedCSV(data):
     fields = ["CID","RO","AC","AM","RR","PA","AP","TO","MA","PI","CE","RN","PB","PE","AL","SE","BA","MG","ES","RJ","SP","PR","SC","RS","MS", "MT", "GO", "DF", "TOTAL" ]
     
     with open("dados_tratados.csv", "w", newline='') as output:
+        header = ",".join(fields) + "\n"
+        output.write(header)
         w = csv.DictWriter(output, fields)
         for item in data:
             for key, val in sorted(item.items()):
